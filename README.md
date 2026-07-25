@@ -7,6 +7,12 @@ güncellenebilir ve paylaşımı kolay bir dijital profil sunmaktır.
 
 > ⚠️ Proje başlangıç aşamasındadır; içerik geliştirildikçe bu dosya güncellenir.
 
+## Ekran Görüntüsü
+
+<p align="center">
+  <img src="docs/images/ekran-goruntusu.png" alt="BizCard dijital kartvizit ekran görüntüsü" width="360">
+</p>
+
 ## Özellikler (MVP)
 
 - [ ] Kartvizit oluşturma ve düzenleme (ad, unvan, şirket, iletişim bilgileri)
