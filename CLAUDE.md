@@ -35,6 +35,9 @@ Bağımlılıksız, statik ön yüz (vanilla). Herhangi bir framework veya CDN y
 - `style.css` — Her iki sürümün ortak stilleri (tema, düzen, responsive, hover).
 - `script.js` — Vanilla sürümün tema geçişi ve `localStorage` mantığı.
 - `docs/superpowers/specs/` — Tasarım dokümanları (spec).
+- `.claude/skills/bizcard-bilesen-webhook/` — Bileşen kuralları (tek dosya,
+  fonksiyon bileşeni, demo veri `src/data/card.js`'de) ve webhook JSON
+  sözleşmesi (Kartı Kaydet / Toplantı Talep Et) için referans skill.
 
 ## Geliştirme Komutları
 Derleme adımı yoktur; statik dosyalardan oluşur.
