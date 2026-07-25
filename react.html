@@ -15,6 +15,15 @@
   <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+
+  <!-- QR kod bileşeni: qrcode.react yalnızca ESM olarak dağıtıldığından esm.sh
+       üzerinden yüklenir. Global'e yazılıp hazır olduğunda olay tetiklenir;
+       aşağıdaki QrCode bileşeni bu olayı dinleyip QR'ı render eder. -->
+  <script type="module">
+    import { QRCodeSVG } from "https://esm.sh/qrcode.react@3.1.0";
+    window.QRCodeSVG = QRCodeSVG;
+    window.dispatchEvent(new Event("qrcode-ready"));
+  </script>
 </head>
 <body>
   <div id="root"></div>
@@ -25,6 +34,10 @@
   -->
   <script type="text/babel" data-presets="react">
     const { useState, useEffect } = React;
+
+    /* ===== Canlı deploy adresi (QR kod bunu işaret eder) =====
+       Deploy adresi değişirse yalnızca bu sabiti güncelle. */
+    const DEPLOY_URL = "https://mergunoni.github.io/bizcard-miuul/";
 
     /* ===== İçerik (tek düzenlenebilir yer) ===== */
     const profile = {
@@ -110,6 +123,32 @@
     /* ===== Bileşen: Avatar ===== */
     function Avatar({ initials }) {
       return <div className="avatar" aria-hidden="true">{initials}</div>;
+    }
+
+    /* ===== Bileşen: QrCode =====
+       qrcode.react (QRCodeSVG) esm.sh'ten asenkron yüklenir; global hazır
+       olunca "qrcode-ready" olayıyla yeniden render edilir. */
+    function QrCode({ url }) {
+      const [QR, setQR] = useState(() => window.QRCodeSVG || null);
+
+      useEffect(() => {
+        if (QR) return;
+        const onReady = () => setQR(() => window.QRCodeSVG || null);
+        window.addEventListener("qrcode-ready", onReady);
+        return () => window.removeEventListener("qrcode-ready", onReady);
+      }, [QR]);
+
+      return (
+        <section className="qr" aria-label="QR kod ile paylaş">
+          <div className="qr__frame">
+            {QR && (
+              <QR value={url} size={128} bgColor="#ffffff"
+                  fgColor="#1f2937" level="M" />
+            )}
+          </div>
+          <p className="qr__caption">Kartı paylaşmak için QR'ı okut</p>
+        </section>
+      );
     }
 
     /* ===== Bileşen: ContactList ===== */
@@ -198,6 +237,8 @@
               </a>
             ))}
           </nav>
+
+          <QrCode url={DEPLOY_URL} />
         </main>
       );
     }

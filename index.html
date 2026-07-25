@@ -102,8 +102,16 @@
         </svg>
       </a>
     </nav>
+
+    <!-- QR kod: canlı deploy URL'ini işaret eder (adres script.js'te) -->
+    <section class="qr" aria-label="QR kod ile paylaş">
+      <div class="qr__frame" id="qr-code"></div>
+      <p class="qr__caption">Kartı paylaşmak için QR'ı okut</p>
+    </section>
   </main>
 
+  <!-- QR kod kütüphanesi (qrcodejs) -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

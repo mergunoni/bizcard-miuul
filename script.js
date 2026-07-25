@@ -44,3 +44,25 @@
     });
   }
 })();
+
+// BizCard — kartın altındaki QR kodu (canlı deploy URL'ini işaret eder)
+(function () {
+  "use strict";
+
+  // Deploy adresi değişirse yalnızca bu sabiti güncelle.
+  var DEPLOY_URL = "https://mergunoni.github.io/bizcard-miuul/";
+
+  var container = document.getElementById("qr-code");
+  if (!container || typeof window.QRCode !== "function") {
+    return;
+  }
+
+  new window.QRCode(container, {
+    text: DEPLOY_URL,
+    width: 128,
+    height: 128,
+    colorDark: "#1f2937",
+    colorLight: "#ffffff",
+    correctLevel: window.QRCode.CorrectLevel.M,
+  });
+})();

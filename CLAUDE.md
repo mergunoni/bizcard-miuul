@@ -24,16 +24,26 @@ Bağımlılıksız, statik ön yüz (vanilla). Herhangi bir framework veya CDN y
 
 - **Dil / Framework:** HTML + CSS + Vanilla JavaScript
 - **Veri saklama:** Tema tercihi için tarayıcı `localStorage` (backend yok)
+- **QR kod:** Kartın altındaki QR, canlı deploy URL'ini işaret eder.
+  - Vanilla (`index.html`): `qrcodejs` (jsDelivr CDN, global `QRCode`).
+  - React (`react.html`): `qrcode.react` (`QRCodeSVG`), yalnızca ESM olarak
+    dağıtıldığından `esm.sh` üzerinden yüklenir.
+  - Deploy adresi tek yerden değiştirilir: `script.js` ve `react.html` içindeki
+    `DEPLOY_URL` sabiti.
 - **Deployment:** Statik dosya barındırma (herhangi bir statik host / dosyayı
   doğrudan tarayıcıda açma)
 
 ## Proje Yapısı
 - `index.html` — Vanilla sürüm: kartvizit iskeleti ve tüm içerik (tek blok).
 - `react.html` — React sürümü: CDN (React/ReactDOM/Babel 7) ile, kurulum
-  gerektirmeyen tek dosya. `Avatar`, `ContactList`, `ProfilCard` bileşenleri.
-  Not: Babel 7 sabitlendi (klasik JSX runtime); Babel 8 boş sayfaya yol açıyor.
-- `style.css` — Her iki sürümün ortak stilleri (tema, düzen, responsive, hover).
-- `script.js` — Vanilla sürümün tema geçişi ve `localStorage` mantığı.
+  gerektirmeyen tek dosya. `Avatar`, `ContactList`, `ProfilCard`, `QrCode`
+  bileşenleri. `qrcode.react` esm.sh'ten asenkron yüklenip `qrcode-ready`
+  olayıyla render edilir. Not: Babel 7 sabitlendi (klasik JSX runtime); Babel 8
+  boş sayfaya yol açıyor.
+- `style.css` — Her iki sürümün ortak stilleri (tema, düzen, responsive, hover,
+  QR bölümü `.qr` / `.qr__frame` / `.qr__caption`).
+- `script.js` — Vanilla sürümün tema geçişi + `localStorage` mantığı ve QR kod
+  üretimi (`DEPLOY_URL`).
 - `docs/superpowers/specs/` — Tasarım dokümanları (spec).
 - `.claude/skills/bizcard-bilesen-webhook/` — Bileşen kuralları (tek dosya,
   fonksiyon bileşeni, demo veri `src/data/card.js`'de) ve webhook JSON
