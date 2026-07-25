@@ -39,6 +39,13 @@
        Deploy adresi değişirse yalnızca bu sabiti güncelle. */
     const DEPLOY_URL = "https://mergunoni.github.io/bizcard-miuul/";
 
+    /* ===== Kart kimliği ve n8n webhook adresi =====
+       n8n Webhook (production) URL'ini buraya gir. Yer tutucu kaldıkça
+       "Kartı Kaydet" / "Toplantı Talep Et" isteği atılmaz. */
+    const CARD_ID = "mehmet-ergun";
+    const WEBHOOK_URL = "https://n8n.ornek.com/webhook/bizcard";
+    const WEBHOOK_PLACEHOLDER = "https://n8n.ornek.com/webhook/bizcard";
+
     /* ===== İçerik (tek düzenlenebilir yer) ===== */
     const profile = {
       initials: "ME",
@@ -151,6 +158,169 @@
       );
     }
 
+    /* ===== Bileşen: LeadForm =====
+       Tek form, iki aksiyon: "Kartı Kaydet" (card_saved) ve "Toplantı Talep Et"
+       (meeting_request) aynı alanları paylaşır. Tarih yalnızca toplantı
+       talebinde zorunludur. */
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Yerel güne göre "YYYY-MM-DD" (toISOString UTC'ye kaydırdığı için offset düşülür)
+    function today() {
+      const now = new Date();
+      return new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+        .toISOString()
+        .slice(0, 10);
+    }
+
+    function LeadForm({ cardId, webhookUrl }) {
+      const [name, setName] = useState("");
+      const [email, setEmail] = useState("");
+      const [preferredDate, setPreferredDate] = useState("");
+      const [status, setStatus] = useState("idle"); // idle|sending|success|error
+      const [message, setMessage] = useState("");
+
+      const sending = status === "sending";
+
+      // type: "card_saved" | "meeting_request"
+      async function send(type) {
+        if (!name.trim() || !EMAIL_RE.test(email.trim())) {
+          setStatus("error");
+          setMessage("Lütfen ad ve geçerli bir e-posta gir.");
+          return;
+        }
+
+        // Tarih yalnızca toplantı talebinde zorunlu; kart kaydında serbest.
+        if (type === "meeting_request") {
+          if (!preferredDate) {
+            setStatus("error");
+            setMessage("Toplantı için tercih ettiğin tarihi seç.");
+            return;
+          }
+          // "min" klavyeyle aşılabildiği için gönderimde de kontrol edilir
+          if (preferredDate < today()) {
+            setStatus("error");
+            setMessage("Geçmiş bir tarih seçilemez.");
+            return;
+          }
+        }
+
+        if (webhookUrl === WEBHOOK_PLACEHOLDER) {
+          setStatus("error");
+          setMessage("Form hazır; n8n webhook URL'i girilince aktif olur.");
+          return;
+        }
+
+        setStatus("sending");
+        setMessage("Gönderiliyor…");
+
+        const envelope = {
+          type: type,
+          cardId: cardId,
+          timestamp: new Date().toISOString(),
+          name: name.trim(),
+          email: email.trim(),
+        };
+        const payload =
+          type === "meeting_request"
+            ? { ...envelope, phone: "", preferredDate: preferredDate, message: "" }
+            : { ...envelope, source: "link" };
+
+        try {
+          const res = await fetch(webhookUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          if (res.ok) {
+            setName("");
+            setEmail("");
+            setPreferredDate("");
+            setStatus("success");
+            setMessage(
+              type === "meeting_request"
+                ? "Toplantı talebin iletildi."
+                : "Teşekkürler! Bilgilerin kaydedildi."
+            );
+          } else {
+            setStatus("error");
+            setMessage("Gönderilemedi, lütfen tekrar dene.");
+          }
+        } catch (err) {
+          setStatus("error");
+          setMessage("Bağlantı hatası, lütfen tekrar dene.");
+        }
+      }
+
+      // Enter tuşu ve "Kartı Kaydet" düğmesi formu gönderir
+      function handleSubmit(event) {
+        event.preventDefault();
+        send("card_saved");
+      }
+
+      const statusClass =
+        "lead__status" +
+        (status === "success" ? " lead__status--ok" : "") +
+        (status === "error" ? " lead__status--err" : "");
+
+      return (
+        <form className="lead" onSubmit={handleSubmit} noValidate>
+          <label className="lead__field">
+            <span className="lead__label">Ad Soyad</span>
+            <input
+              className="lead__input"
+              type="text"
+              name="name"
+              required
+              autoComplete="name"
+              placeholder="Adınız soyadınız"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </label>
+          <label className="lead__field">
+            <span className="lead__label">E-posta</span>
+            <input
+              className="lead__input"
+              type="email"
+              name="email"
+              required
+              autoComplete="email"
+              placeholder="ornek@eposta.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </label>
+          <label className="lead__field">
+            <span className="lead__label">Tercih edilen tarih (toplantı için)</span>
+            <input
+              className="lead__input"
+              type="date"
+              name="preferredDate"
+              min={today()}
+              value={preferredDate}
+              onChange={(e) => setPreferredDate(e.target.value)}
+            />
+          </label>
+          <div className="lead__actions">
+            <button className="lead__submit" type="submit" disabled={sending}>
+              Kartı Kaydet
+            </button>
+            <button
+              className="lead__submit lead__submit--alt"
+              type="button"
+              disabled={sending}
+              onClick={() => send("meeting_request")}
+            >
+              Toplantı Talep Et
+            </button>
+          </div>
+          <p className={statusClass} role="status" aria-live="polite">
+            {message}
+          </p>
+        </form>
+      );
+    }
+
     /* ===== Bileşen: ContactList ===== */
     function ContactList({ contacts }) {
       return (
@@ -237,6 +407,8 @@
               </a>
             ))}
           </nav>
+
+          <LeadForm cardId={CARD_ID} webhookUrl={WEBHOOK_URL} />
 
           <QrCode url={DEPLOY_URL} />
         </main>

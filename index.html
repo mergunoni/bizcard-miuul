@@ -103,6 +103,33 @@
       </a>
     </nav>
 
+    <!-- Tek form, iki aksiyon: "Kartı Kaydet" ve "Toplantı Talep Et" aynı
+         alanları paylaşır; tarih yalnızca toplantı talebinde zorunludur.
+         Gönderim mantığı script.js'te. -->
+    <form class="lead" id="save-form" novalidate>
+      <label class="lead__field">
+        <span class="lead__label">Ad Soyad</span>
+        <input class="lead__input" type="text" name="name" required
+               autocomplete="name" placeholder="Adınız soyadınız" />
+      </label>
+      <label class="lead__field">
+        <span class="lead__label">E-posta</span>
+        <input class="lead__input" type="email" name="email" required
+               autocomplete="email" placeholder="ornek@eposta.com" />
+      </label>
+      <label class="lead__field">
+        <span class="lead__label">Tercih edilen tarih (toplantı için)</span>
+        <!-- "min" (bugün) script.js tarafından atanır: geçmiş tarih seçilemez -->
+        <input class="lead__input" type="date" name="preferredDate" />
+      </label>
+      <div class="lead__actions">
+        <button class="lead__submit" type="submit">Kartı Kaydet</button>
+        <button class="lead__submit lead__submit--alt" type="button"
+                id="meeting-button">Toplantı Talep Et</button>
+      </div>
+      <p class="lead__status" role="status" aria-live="polite"></p>
+    </form>
+
     <!-- QR kod: canlı deploy URL'ini işaret eder (adres script.js'te) -->
     <section class="qr" aria-label="QR kod ile paylaş">
       <div class="qr__frame" id="qr-code"></div>

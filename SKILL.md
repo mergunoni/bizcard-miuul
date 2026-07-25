@@ -61,19 +61,23 @@ sahibi doldurur. Her payload ortak zarfı taşır:
 | `timestamp` | string | evet | ISO 8601, ör. `"2026-07-25T10:00:00Z"` |
 
 ### 1. Kartı Kaydet — `type: "card_saved"`
-Kartı gören kişi rehbere/kaydet aksiyonunu tetiklediğinde gönderilir.
+Kartı gören kişi ad + e-postasını bırakıp "Kartı Kaydet"e bastığında gönderilir.
 
 ```json
 {
   "type": "card_saved",
   "cardId": "mehmet-ergun",
   "timestamp": "2026-07-25T10:00:00Z",
-  "source": "qr"
+  "name": "Ayşe Kaya",
+  "email": "ayse@ornek.com",
+  "source": "link"
 }
 ```
 
 | Alan | Tip | Zorunlu | Açıklama |
 |------|-----|---------|----------|
+| `name` | string | evet | Kaydeden kişinin adı soyadı |
+| `email` | string | evet | Geri dönüş e-postası |
 | `source` | string | hayır | Nereden geldi: `"qr"` veya `"link"` |
 
 ### 2. Toplantı Talep Et — `type: "meeting_request"`

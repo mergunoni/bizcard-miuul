@@ -24,12 +24,21 @@ Bağımlılıksız, statik ön yüz (vanilla). Herhangi bir framework veya CDN y
 
 - **Dil / Framework:** HTML + CSS + Vanilla JavaScript
 - **Veri saklama:** Tema tercihi için tarayıcı `localStorage` (backend yok)
-- **QR kod:** Kartın altındaki QR, canlı deploy URL'ini işaret eder.
+- **QR kod:** Kartın en altındaki QR, canlı deploy URL'ini işaret eder.
   - Vanilla (`index.html`): `qrcodejs` (jsDelivr CDN, global `QRCode`).
   - React (`react.html`): `qrcode.react` (`QRCodeSVG`), yalnızca ESM olarak
     dağıtıldığından `esm.sh` üzerinden yüklenir.
   - Deploy adresi tek yerden değiştirilir: `script.js` ve `react.html` içindeki
     `DEPLOY_URL` sabiti.
+- **Kart formu (tek form, iki aksiyon):** QR'ın üstündeki form (ad + e-posta +
+  tercih edilen tarih) n8n webhook'una `POST` JSON gönderir. Yan yana duran iki
+  buton aynı alanları paylaşır: "Kartı Kaydet" → `card_saved`, "Toplantı Talep
+  Et" → `meeting_request` (sözleşme `SKILL.md`'de). Tarih alanı **yalnızca
+  toplantı talebinde zorunludur**; kart kaydında boş bırakılabilir. Tarihte
+  `min` = bugün (geçmiş tarih seçilemez); klavyeyle aşılabildiği için gönderimde
+  de kontrol edilir. Endpoint tek
+  yerden değiştirilir: `script.js` ve `react.html` içindeki `WEBHOOK_URL` sabiti
+  (yer tutucu kaldıkça istek atılmaz).
 - **Deployment:** Statik dosya barındırma (herhangi bir statik host / dosyayı
   doğrudan tarayıcıda açma)
 
@@ -38,12 +47,14 @@ Bağımlılıksız, statik ön yüz (vanilla). Herhangi bir framework veya CDN y
 - `react.html` — React sürümü: CDN (React/ReactDOM/Babel 7) ile, kurulum
   gerektirmeyen tek dosya. `Avatar`, `ContactList`, `ProfilCard`, `QrCode`
   bileşenleri. `qrcode.react` esm.sh'ten asenkron yüklenip `qrcode-ready`
-  olayıyla render edilir. Not: Babel 7 sabitlendi (klasik JSX runtime); Babel 8
-  boş sayfaya yol açıyor.
+  olayıyla render edilir. `LeadForm` bileşeni kart formudur ("Kartı Kaydet" +
+  "Toplantı Talep Et" aksiyonları tek formda). Not:
+  Babel 7 sabitlendi (klasik JSX runtime); Babel 8 boş sayfaya yol açıyor.
 - `style.css` — Her iki sürümün ortak stilleri (tema, düzen, responsive, hover,
-  QR bölümü `.qr` / `.qr__frame` / `.qr__caption`).
-- `script.js` — Vanilla sürümün tema geçişi + `localStorage` mantığı ve QR kod
-  üretimi (`DEPLOY_URL`).
+  QR bölümü `.qr*`, form bölümü `.lead*`).
+- `script.js` — Vanilla sürümün tema geçişi + `localStorage` mantığı, QR kod
+  üretimi (`DEPLOY_URL`) ve kart formu gönderimi (`WEBHOOK_URL`; `card_saved` /
+  `meeting_request`).
 - `docs/superpowers/specs/` — Tasarım dokümanları (spec).
 - `.claude/skills/bizcard-bilesen-webhook/` — Bileşen kuralları (tek dosya,
   fonksiyon bileşeni, demo veri `src/data/card.js`'de) ve webhook JSON
