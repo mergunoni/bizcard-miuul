@@ -33,7 +33,7 @@
     nesnesini düzenlemen yeterli.
   -->
   <script type="text/babel" data-presets="react">
-    const { useState, useEffect } = React;
+    const { useState, useEffect, useRef } = React;
 
     /* ===== Canlı deploy adresi (QR kod bunu işaret eder) =====
        Deploy adresi değişirse yalnızca bu sabiti güncelle. */
@@ -241,9 +241,18 @@
       const [message, setMessage] = useState("");
 
       const sending = status === "sending";
+      // State güncellemeleri asenkron/batch'li olduğundan, senkron art arda
+      // (ör. Enter'a hızlı basma) çağrılara karşı ref ile senkron kilit tutulur.
+      const sendingRef = useRef(false);
 
       // type: "card_saved" | "meeting_request"
       async function send(type) {
+        // Buton disabled olsa da Enter tuşu formu gönderebildiği için art arda
+        // gönderimi burada da engelliyoruz.
+        if (sendingRef.current) {
+          return;
+        }
+
         if (!name.trim() || !EMAIL_RE.test(email.trim())) {
           setStatus("error");
           setMessage("Lütfen ad ve geçerli bir e-posta gir.");
@@ -271,6 +280,7 @@
           return;
         }
 
+        sendingRef.current = true;
         setStatus("sending");
         setMessage("Gönderiliyor…");
 
@@ -309,6 +319,8 @@
         } catch (err) {
           setStatus("error");
           setMessage("Bağlantı hatası, lütfen tekrar dene.");
+        } finally {
+          sendingRef.current = false;
         }
       }
 
@@ -452,8 +464,6 @@
             <p className="card__title">{profile.title}</p>
           </header>
 
-          <SaveContactButton profile={profile} />
-
           <ContactList contacts={profile.contacts} />
 
           <nav className="social" aria-label="Sosyal medya">
@@ -472,6 +482,8 @@
           </nav>
 
           <LeadForm cardId={CARD_ID} webhookUrl={WEBHOOK_URL} />
+
+          <SaveContactButton profile={profile} />
 
           <QrCode url={DEPLOY_URL} />
         </main>

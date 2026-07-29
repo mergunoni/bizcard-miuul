@@ -38,14 +38,20 @@ Bağımlılıksız, statik ön yüz (vanilla). Herhangi bir framework veya CDN y
   `min` = bugün (geçmiş tarih seçilemez); klavyeyle aşılabildiği için gönderimde
   de kontrol edilir. Endpoint tek
   yerden değiştirilir: `script.js` ve `react.html` içindeki `WEBHOOK_URL` sabiti
-  (yer tutucu kaldıkça istek atılmaz).
-- **Rehbere kaydet (vCard):** Header'ın altındaki "📇 Rehbere Kaydet" butonu,
-  kart bilgilerinden (ad, unvan, telefon, e-posta, web sitesi — sosyal medya
-  hariç) vCard 3.0 formatında bir `.vcf` metni üretip `Blob` + geçici
-  `<a download>` ile indirir. Telefon bu dosyayı açtığında native "kişiyi
-  rehbere ekle" ekranını gösterir. Vanilla sürümde veriler DOM'dan
-  (`.card__name`, `.card__title`, `tel:`/`mailto:`/`https:` linkleri) okunur;
-  React sürümünde `profile` objesinden türetilir. Dış bağımlılık yok.
+  (yer tutucu kaldıkça istek atılmaz). Gönderim sırasında iki buton da devre
+  dışı kalır; art arda gönderimi engellemek için (Enter tuşu disabled butonu
+  atlayıp formu yine de submit edebildiğinden) `send()`'in başında ayrıca bir
+  kilit kontrol edilir — vanilla'da modül içi `sending` değişkeni, React'te
+  `useRef` tabanlı `sendingRef` (state yerine ref: state güncellemesi asenkron
+  olduğundan senkron art arda çağrılara karşı yetersiz kalıyordu).
+- **Rehbere kaydet (vCard):** Kart formunun altında, QR kodun hemen üstündeki
+  "📇 Rehbere Kaydet" butonu, kart bilgilerinden (ad, unvan, telefon, e-posta,
+  web sitesi — sosyal medya hariç) vCard 3.0 formatında bir `.vcf` metni
+  üretip `Blob` + geçici `<a download>` ile indirir. Telefon bu dosyayı
+  açtığında native "kişiyi rehbere ekle" ekranını gösterir. Vanilla sürümde
+  veriler DOM'dan (`.card__name`, `.card__title`, `tel:`/`mailto:`/`https:`
+  linkleri) okunur; React sürümünde `profile` objesinden türetilir. Dış
+  bağımlılık yok.
 - **Deployment:** Vercel (canonical, canlı adres:
   `https://bizcard-miuul-mehmet24.vercel.app/`). Proje `.vercel/` ile Vercel
   hesabına bağlı (`vercel link`); yayın `vercel --prod` ile yapılır.

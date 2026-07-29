@@ -89,6 +89,7 @@
   var buttons = form.querySelectorAll(".lead__submit");
   var meetingButton = document.getElementById("meeting-button");
   var dateField = form.elements.preferredDate;
+  var sending = false;
 
   // Yerel güne göre "YYYY-MM-DD" (toISOString UTC'ye kaydırdığı için offset düşülür)
   function today() {
@@ -117,6 +118,12 @@
 
   // type: "card_saved" | "meeting_request"
   function send(type) {
+    // Buton disabled olsa da Enter tuşu formu gönderebildiği için art arda
+    // gönderimi burada da engelliyoruz.
+    if (sending) {
+      return;
+    }
+
     var name = form.elements.name.value.trim();
     var email = form.elements.email.value.trim();
     var preferredDate = dateField.value;
@@ -163,6 +170,7 @@
       payload.source = "link";
     }
 
+    sending = true;
     setBusy(true);
     setStatus("Gönderiliyor…");
 
@@ -188,6 +196,7 @@
         setStatus("Bağlantı hatası, lütfen tekrar dene.", "err");
       })
       .finally(function () {
+        sending = false;
         setBusy(false);
       });
   }
