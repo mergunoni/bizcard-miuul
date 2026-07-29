@@ -59,6 +59,13 @@ Bağımlılıksız, statik ön yüz (vanilla). Herhangi bir framework veya CDN y
   erişilemez olur (`vercel project protection disable bizcard-miuul --sso`).
   GitHub Pages (`mergunoni.github.io/bizcard-miuul/`) hâlâ ayakta ama artık
   `DEPLOY_URL`/QR kodun işaret ettiği canonical adres değil.
+- **KVKK aydınlatma metni:** `privacy.html`, hem vanilla hem React sürümündeki
+  form içeriğiyle aynı `style.css` token'larını kullanan, tek kanonik
+  (tek dosya, iki formatta tekrarlanmayan) bir sayfa. Kart formunun altına
+  ("Kartı Kaydet"/"Toplantı Talep Et" butonlarından önce) bu sayfaya link
+  veren bir `.lead__privacy` notu eklendi. Veri sorumlusu: Mehmet Ergün
+  (kartta görünen iletişim bilgileriyle). Bu genel bir taslaktır, hukuki
+  danışmanlık yerine geçmez; gerçek kullanım öncesi hukukçu kontrolü önerilir.
 
 ## Proje Yapısı
 - `index.html` — Vanilla sürüm: kartvizit iskeleti ve tüm içerik (tek blok).
@@ -71,6 +78,8 @@ Bağımlılıksız, statik ön yüz (vanilla). Herhangi bir framework veya CDN y
 - `style.css` — Her iki sürümün ortak stilleri (tema, düzen, responsive, hover,
   QR bölümü `.qr*`, form bölümü `.lead*`, rehbere kaydet butonu
   `.save-contact`).
+- `privacy.html` — KVKK aydınlatma metni (tek kanonik sayfa, vanilla + React
+  ortak).
 - `script.js` — Vanilla sürümün tema geçişi + `localStorage` mantığı, QR kod
   üretimi (`DEPLOY_URL`), kart formu gönderimi (`WEBHOOK_URL`; `card_saved` /
   `meeting_request`) ve rehbere kaydet (vCard/.vcf) indirme.
