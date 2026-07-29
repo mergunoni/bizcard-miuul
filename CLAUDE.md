@@ -17,7 +17,7 @@ alan, güncellenebilir ve paylaşımı kolay bir dijital profil sunmaktır.
 - [ ] Paylaşım: benzersiz link ve QR kod üretme
 - [ ] Kartvizit görüntüleme (paylaşılan kişinin göreceği herkese açık sayfa)
 - [ ] Tema / tasarım seçenekleri (renk, düzen)
-- [ ] (Opsiyonel) Rehbere kaydet (vCard / .vcf indirme)
+- [x] (Opsiyonel) Rehbere kaydet (vCard / .vcf indirme)
 
 ## Teknoloji Yığını
 Bağımlılıksız, statik ön yüz (vanilla). Herhangi bir framework veya CDN yok.
@@ -39,22 +39,30 @@ Bağımlılıksız, statik ön yüz (vanilla). Herhangi bir framework veya CDN y
   de kontrol edilir. Endpoint tek
   yerden değiştirilir: `script.js` ve `react.html` içindeki `WEBHOOK_URL` sabiti
   (yer tutucu kaldıkça istek atılmaz).
+- **Rehbere kaydet (vCard):** Header'ın altındaki "📇 Rehbere Kaydet" butonu,
+  kart bilgilerinden (ad, unvan, telefon, e-posta, web sitesi — sosyal medya
+  hariç) vCard 3.0 formatında bir `.vcf` metni üretip `Blob` + geçici
+  `<a download>` ile indirir. Telefon bu dosyayı açtığında native "kişiyi
+  rehbere ekle" ekranını gösterir. Vanilla sürümde veriler DOM'dan
+  (`.card__name`, `.card__title`, `tel:`/`mailto:`/`https:` linkleri) okunur;
+  React sürümünde `profile` objesinden türetilir. Dış bağımlılık yok.
 - **Deployment:** Statik dosya barındırma (herhangi bir statik host / dosyayı
   doğrudan tarayıcıda açma)
 
 ## Proje Yapısı
 - `index.html` — Vanilla sürüm: kartvizit iskeleti ve tüm içerik (tek blok).
 - `react.html` — React sürümü: CDN (React/ReactDOM/Babel 7) ile, kurulum
-  gerektirmeyen tek dosya. `Avatar`, `ContactList`, `ProfilCard`, `QrCode`
-  bileşenleri. `qrcode.react` esm.sh'ten asenkron yüklenip `qrcode-ready`
-  olayıyla render edilir. `LeadForm` bileşeni kart formudur ("Kartı Kaydet" +
-  "Toplantı Talep Et" aksiyonları tek formda). Not:
-  Babel 7 sabitlendi (klasik JSX runtime); Babel 8 boş sayfaya yol açıyor.
+  gerektirmeyen tek dosya. `Avatar`, `ContactList`, `ProfilCard`, `QrCode`,
+  `SaveContactButton` bileşenleri. `qrcode.react` esm.sh'ten asenkron
+  yüklenip `qrcode-ready` olayıyla render edilir. `LeadForm` bileşeni kart
+  formudur ("Kartı Kaydet" + "Toplantı Talep Et" aksiyonları tek formda).
+  Not: Babel 7 sabitlendi (klasik JSX runtime); Babel 8 boş sayfaya yol açıyor.
 - `style.css` — Her iki sürümün ortak stilleri (tema, düzen, responsive, hover,
-  QR bölümü `.qr*`, form bölümü `.lead*`).
+  QR bölümü `.qr*`, form bölümü `.lead*`, rehbere kaydet butonu
+  `.save-contact`).
 - `script.js` — Vanilla sürümün tema geçişi + `localStorage` mantığı, QR kod
-  üretimi (`DEPLOY_URL`) ve kart formu gönderimi (`WEBHOOK_URL`; `card_saved` /
-  `meeting_request`).
+  üretimi (`DEPLOY_URL`), kart formu gönderimi (`WEBHOOK_URL`; `card_saved` /
+  `meeting_request`) ve rehbere kaydet (vCard/.vcf) indirme.
 - `docs/superpowers/specs/` — Tasarım dokümanları (spec).
 - `.claude/skills/bizcard-bilesen-webhook/` — Bileşen kuralları (tek dosya,
   fonksiyon bileşeni, demo veri `src/data/card.js`'de) ve webhook JSON

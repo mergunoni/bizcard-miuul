@@ -204,3 +204,86 @@
     });
   }
 })();
+
+// BizCard — "Rehbere Kaydet": kart bilgilerinden vCard (.vcf) üretip indirir
+(function () {
+  "use strict";
+
+  var button = document.getElementById("save-contact");
+  if (!button) {
+    return;
+  }
+
+  // Ad/soyad ayrımı: son boşluğa göre (tek kelimelik isimlerde soyad boş kalır)
+  function splitName(fullName) {
+    var idx = fullName.lastIndexOf(" ");
+    if (idx === -1) {
+      return { given: fullName, family: "" };
+    }
+    return {
+      given: fullName.slice(0, idx),
+      family: fullName.slice(idx + 1),
+    };
+  }
+
+  function buildVCard() {
+    var nameEl = document.querySelector(".card__name");
+    var titleEl = document.querySelector(".card__title");
+    var phoneEl = document.querySelector('.contact__link[href^="tel:"]');
+    var emailEl = document.querySelector('.contact__link[href^="mailto:"]');
+    var webEl = document.querySelector(
+      '.contact__link[href^="http"]:not([href^="mailto:"])'
+    );
+
+    if (!nameEl) {
+      return null;
+    }
+
+    var fullName = nameEl.textContent.trim();
+    var name = splitName(fullName);
+    var lines = ["BEGIN:VCARD", "VERSION:3.0"];
+
+    lines.push("N:" + name.family + ";" + name.given + ";;;");
+    lines.push("FN:" + fullName);
+
+    if (titleEl && titleEl.textContent.trim()) {
+      lines.push("TITLE:" + titleEl.textContent.trim());
+    }
+    if (phoneEl) {
+      lines.push("TEL;TYPE=CELL:" + phoneEl.getAttribute("href").replace("tel:", ""));
+    }
+    if (emailEl) {
+      lines.push("EMAIL:" + emailEl.getAttribute("href").replace("mailto:", ""));
+    }
+    if (webEl) {
+      lines.push("URL:" + webEl.getAttribute("href"));
+    }
+
+    lines.push("END:VCARD");
+    return { text: lines.join("\r\n"), fullName: fullName };
+  }
+
+  button.addEventListener("click", function () {
+    var vcard = buildVCard();
+    if (!vcard) {
+      return;
+    }
+
+    var filename =
+      vcard.fullName
+        .toLowerCase()
+        .replace(/[^a-z0-9şıöüğç\s-]/gi, "")
+        .trim()
+        .replace(/\s+/g, "-") + ".vcf";
+
+    var blob = new Blob([vcard.text], { type: "text/vcard" });
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  });
+})();

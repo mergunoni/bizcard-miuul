@@ -127,6 +127,67 @@
       );
     };
 
+    /* ===== "Rehbere Kaydet": profile'dan vCard (.vcf) üretip indirir ===== */
+    // Ad/soyad ayrımı: son boşluğa göre (tek kelimelik isimlerde soyad boş kalır)
+    function splitName(fullName) {
+      const idx = fullName.lastIndexOf(" ");
+      if (idx === -1) return { given: fullName, family: "" };
+      return { given: fullName.slice(0, idx), family: fullName.slice(idx + 1) };
+    }
+
+    function buildVCard(profile) {
+      const name = splitName(profile.name);
+      const phone = profile.contacts.find((c) => c.type === "phone");
+      const mail = profile.contacts.find((c) => c.type === "mail");
+      const web = profile.contacts.find((c) => c.type === "web");
+
+      const lines = [
+        "BEGIN:VCARD",
+        "VERSION:3.0",
+        `N:${name.family};${name.given};;;`,
+        `FN:${profile.name}`,
+      ];
+      if (profile.title) lines.push(`TITLE:${profile.title}`);
+      if (phone) lines.push(`TEL;TYPE=CELL:${phone.href.replace("tel:", "")}`);
+      if (mail) lines.push(`EMAIL:${mail.href.replace("mailto:", "")}`);
+      if (web) lines.push(`URL:${web.href}`);
+      lines.push("END:VCARD");
+
+      return lines.join("\r\n");
+    }
+
+    function downloadVCard(profile) {
+      const text = buildVCard(profile);
+      const filename =
+        profile.name
+          .toLowerCase()
+          .replace(/[^a-z0-9şıöüğç\s-]/gi, "")
+          .trim()
+          .replace(/\s+/g, "-") + ".vcf";
+
+      const blob = new Blob([text], { type: "text/vcard" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    function SaveContactButton({ profile }) {
+      return (
+        <button
+          type="button"
+          className="save-contact"
+          onClick={() => downloadVCard(profile)}
+        >
+          📇 Rehbere Kaydet
+        </button>
+      );
+    }
+
     /* ===== Bileşen: Avatar ===== */
     function Avatar({ initials }) {
       return <div className="avatar" aria-hidden="true">{initials}</div>;
@@ -390,6 +451,8 @@
             <h1 className="card__name">{profile.name}</h1>
             <p className="card__title">{profile.title}</p>
           </header>
+
+          <SaveContactButton profile={profile} />
 
           <ContactList contacts={profile.contacts} />
 
