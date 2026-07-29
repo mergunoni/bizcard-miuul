@@ -46,8 +46,13 @@ Bağımlılıksız, statik ön yüz (vanilla). Herhangi bir framework veya CDN y
   rehbere ekle" ekranını gösterir. Vanilla sürümde veriler DOM'dan
   (`.card__name`, `.card__title`, `tel:`/`mailto:`/`https:` linkleri) okunur;
   React sürümünde `profile` objesinden türetilir. Dış bağımlılık yok.
-- **Deployment:** Statik dosya barındırma (herhangi bir statik host / dosyayı
-  doğrudan tarayıcıda açma)
+- **Deployment:** Vercel (canonical, canlı adres:
+  `https://bizcard-miuul-mehmet24.vercel.app/`). Proje `.vercel/` ile Vercel
+  hesabına bağlı (`vercel link`); yayın `vercel --prod` ile yapılır.
+  Deployment Protection (SSO) kapalı tutulmalı — açılırsa kart herkese açık
+  erişilemez olur (`vercel project protection disable bizcard-miuul --sso`).
+  GitHub Pages (`mergunoni.github.io/bizcard-miuul/`) hâlâ ayakta ama artık
+  `DEPLOY_URL`/QR kodun işaret ettiği canonical adres değil.
 
 ## Proje Yapısı
 - `index.html` — Vanilla sürüm: kartvizit iskeleti ve tüm içerik (tek blok).

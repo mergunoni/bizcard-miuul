@@ -50,7 +50,7 @@
   "use strict";
 
   // Deploy adresi değişirse yalnızca bu sabiti güncelle.
-  var DEPLOY_URL = "https://mergunoni.github.io/bizcard-miuul/";
+  var DEPLOY_URL = "https://bizcard-miuul-mehmet24.vercel.app/";
 
   var container = document.getElementById("qr-code");
   if (!container || typeof window.QRCode !== "function") {
