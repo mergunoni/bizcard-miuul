@@ -1,0 +1,35 @@
+{
+  "name": "bizcard",
+  "version": "1.0.0",
+  "description": "**Dijital kartvizit** oluşturma ve paylaşma uygulaması. Kullanıcılar kendi dijital kartvizitlerini oluşturur, düzenler ve bir link ya da QR kod aracılığıyla başkalarıyla paylaşabilir. Amaç, klasik basılı kartvizitin yerini alan, güncellenebilir ve paylaşımı kolay bir dijital profil sunmaktır.",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mergunoni/bizcard-miuul.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mergunoni/bizcard-miuul/issues"
+  },
+  "homepage": "https://github.com/mergunoni/bizcard-miuul#readme",
+  "dependencies": {
+    "next": "^16.2.12",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "typescript": "^6.0.3"
+  }
+}
