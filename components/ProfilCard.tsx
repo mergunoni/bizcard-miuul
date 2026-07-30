@@ -1,5 +1,6 @@
 import { Avatar } from "./Avatar";
 import { ContactList } from "./ContactList";
+import { LeadForm } from "./LeadForm";
 import { QrCode } from "./QrCode";
 import { SaveContactButton } from "./SaveContactButton";
 import { SocialNav } from "./SocialNav";
@@ -25,6 +26,8 @@ export function ProfilCard({ profile }: ProfilCardProps) {
       <ContactList contacts={profile.contacts} />
 
       <SocialNav social={profile.social} />
+
+      <LeadForm />
 
       <SaveContactButton profile={profile} />
 
