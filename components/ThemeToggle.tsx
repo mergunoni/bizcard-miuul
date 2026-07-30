@@ -1,22 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-const STORAGE_KEY = "bizcard-theme";
+import { readStoredTheme, THEME_STORAGE_KEY, type Theme } from "@/lib/theme";
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === "light" || saved === "dark") {
-      setTheme(saved);
-    } else if (
-      window.matchMedia &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches
-    ) {
-      setTheme("dark");
-    }
+    setTheme(readStoredTheme());
   }, []);
 
   useEffect(() => {
@@ -26,7 +17,7 @@ export function ThemeToggle() {
   const toggleTheme = () => {
     const next = theme === "dark" ? "light" : "dark";
     setTheme(next);
-    localStorage.setItem(STORAGE_KEY, next);
+    localStorage.setItem(THEME_STORAGE_KEY, next);
   };
 
   return (
