@@ -1,6 +1,7 @@
 import { Avatar } from "./Avatar";
 import { ContactList } from "./ContactList";
 import { QrCode } from "./QrCode";
+import { SaveContactButton } from "./SaveContactButton";
 import { SocialNav } from "./SocialNav";
 import { ThemeToggle } from "./ThemeToggle";
 import { DEPLOY_URL } from "@/lib/config";
@@ -24,6 +25,8 @@ export function ProfilCard({ profile }: ProfilCardProps) {
       <ContactList contacts={profile.contacts} />
 
       <SocialNav social={profile.social} />
+
+      <SaveContactButton profile={profile} />
 
       <QrCode url={DEPLOY_URL} />
     </main>
