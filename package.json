@@ -23,6 +23,7 @@
   "homepage": "https://github.com/mergunoni/bizcard-miuul#readme",
   "dependencies": {
     "next": "^16.2.12",
+    "qrcode.react": "^4.2.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
