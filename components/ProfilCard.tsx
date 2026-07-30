@@ -1,6 +1,7 @@
 import { Avatar } from "./Avatar";
 import { ContactList } from "./ContactList";
 import { SocialNav } from "./SocialNav";
+import { ThemeToggle } from "./ThemeToggle";
 import type { Profile } from "@/lib/card-data";
 
 type ProfilCardProps = {
@@ -10,6 +11,8 @@ type ProfilCardProps = {
 export function ProfilCard({ profile }: ProfilCardProps) {
   return (
     <main className="card" aria-label="Dijital kartvizit">
+      <ThemeToggle />
+
       <header className="card__header">
         <Avatar initials={profile.initials} />
         <h1 className="card__name">{profile.name}</h1>
