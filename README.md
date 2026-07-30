@@ -5,7 +5,11 @@ kartvizitlerini oluşturur, düzenler ve bir link ya da QR kod aracılığıyla
 başkalarıyla paylaşabilir. Amaç, klasik basılı kartvizitin yerini alan,
 güncellenebilir ve paylaşımı kolay bir dijital profil sunmaktır.
 
-> ⚠️ Proje başlangıç aşamasındadır; içerik geliştirildikçe bu dosya güncellenir.
+> ⚠️ Uygulama Next.js'e taşındı. Kart formunun kayıtlarını saklayacak backend
+> (veritabanı) henüz bağlanmadı; form doğrulama yapar ama veriyi hiçbir yere
+> göndermez.
+
+🔗 Canlı: <https://bizcard-miuul-mehmet24.vercel.app/>
 
 ## Ekran Görüntüsü
 
@@ -15,41 +19,40 @@ güncellenebilir ve paylaşımı kolay bir dijital profil sunmaktır.
 
 ## Özellikler (MVP)
 
-- [ ] Kartvizit oluşturma ve düzenleme (ad, unvan, şirket, iletişim bilgileri)
-- [ ] Profil bilgileri: telefon, e-posta, web sitesi, sosyal medya linkleri
-- [ ] Paylaşım: benzersiz link ve QR kod üretme
-- [ ] Kartvizit görüntüleme (herkese açık paylaşım sayfası)
-- [ ] Tema / tasarım seçenekleri (renk, düzen)
-- [ ] (Opsiyonel) Rehbere kaydet (vCard / `.vcf` indirme)
+- [ ] Kartvizit oluşturma ve düzenleme (şimdilik kod içinden: `lib/card-data.ts`)
+- [x] Profil bilgileri: telefon, e-posta, web sitesi, sosyal medya linkleri
+- [x] Paylaşım: link ve QR kod üretme
+- [x] Kartvizit görüntüleme (herkese açık paylaşım sayfası)
+- [x] Tema seçeneği (açık / koyu)
+- [x] (Opsiyonel) Rehbere kaydet (vCard / `.vcf` indirme)
+- [ ] Form kayıtlarının veritabanına yazılması
 
 ## Teknoloji Yığını
 
-Bağımlılıksız, statik ön yüz (vanilla). Framework veya CDN yok.
-
-- **Dil:** HTML + CSS + Vanilla JavaScript
-- **Veri saklama:** Tema tercihi için tarayıcı `localStorage` (backend yok)
-- **Deployment:** Statik dosya barındırma
+- **Framework:** Next.js 16 (App Router) + TypeScript + React 19
+- **QR kod:** `qrcode.react`
+- **Veri saklama:** Tema tercihi için tarayıcı `localStorage`; form kayıtları
+  için kalıcı depolama henüz yok
+- **Deployment:** Vercel
 
 ## Proje Yapısı
 
-| Dosya | Açıklama |
+| Yol | Açıklama |
 | --- | --- |
-| `index.html` | Vanilla sürüm: kartvizit iskeleti ve tüm içerik |
-| `react.html` | React sürümü: CDN (React/ReactDOM/Babel 7) ile tek dosya |
-| `style.css` | Her iki sürümün ortak stilleri (tema, düzen, responsive) |
-| `script.js` | Vanilla sürümün tema geçişi ve `localStorage` mantığı |
-| `docs/` | Tasarım dokümanları (spec) |
+| `app/page.tsx` | Ana sayfa (kartvizit) |
+| `app/privacy/page.tsx` | KVKK aydınlatma metni (`/privacy`) |
+| `app/globals.css` | Tüm stiller (tema, düzen, responsive) |
+| `components/` | `ProfilCard`, `Avatar`, `ContactList`, `SocialNav`, `ThemeToggle`, `QrCode`, `SaveContactButton`, `LeadForm` … |
+| `lib/card-data.ts` | Kart içeriği (tek düzenlenebilir kaynak) |
+| `lib/` | `config.ts` (DEPLOY_URL), `vcard.ts`, `theme.ts`, `date.ts` |
+| `docs/` | Tasarım ve plan dokümanları |
 
 ## Çalıştırma
 
-Derleme adımı yoktur; statik dosyalardan oluşur.
-
 ```bash
-# Doğrudan tarayıcıda aç
-open index.html
-
-# veya yerel sunucu başlat
-python3 -m http.server
+npm install
+npm run dev     # http://localhost:3000
+npm run build   # production build
 ```
 
 ## Lisans

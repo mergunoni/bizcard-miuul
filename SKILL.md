@@ -1,38 +1,38 @@
 ---
 name: bizcard-bilesen-webhook
 description: Use when adding or editing BizCard components (function components,
-  card demo data in src/data/card.js) or wiring the "Kartı Kaydet" /
-  "Toplantı Talep Et" webhook payloads — defines the component conventions and
-  the JSON data contract. Keywords / anahtar kelimeler: bileşen, component,
-  kartvizit, card.js, webhook, Kartı Kaydet, Toplantı Talep, meeting request.
+  card data in lib/card-data.ts) or wiring the "Kartı Kaydet" /
+  "Toplantı Talep Et" form actions — defines the component conventions and
+  the lead data contract. Keywords / anahtar kelimeler: bileşen, component,
+  kartvizit, card-data, lead, Kartı Kaydet, Toplantı Talep, meeting request.
 ---
 
-# BizCard — Bileşen Kuralları ve Webhook Sözleşmesi
+# BizCard — Bileşen Kuralları ve Form Veri Sözleşmesi
 
 ## Overview
 BizCard dijital kartvizit projesinde **bileşen yazma kuralları** ile
-**webhook JSON veri sözleşmesi** için tek referans. Çekirdek ilke: bileşenler
-sade fonksiyon bileşenidir ve veriyi asla hardcode etmez; dış dünyaya giden her
-webhook çağrısı sabit bir zarf (`type`, `cardId`, `timestamp`) taşır.
+**kart formu veri sözleşmesi** için tek referans. Çekirdek ilke: bileşenler
+sade fonksiyon bileşenidir ve veriyi asla hardcode etmez; formdan çıkan her
+kayıt sabit bir şekle (`type`, `name`, `email`, `preferredDate`) sahiptir.
 
 > Bu skill konvansiyonu tanımlar; kodu tek başına yazmaz. İş yaparken CLAUDE.md
-> kurallarına uy (Türkçe iletişim, build yok, küçük ve odaklı değişiklik).
+> kurallarına uy (Türkçe iletişim, küçük ve odaklı değişiklik).
 
 ## Bileşen Kuralları
 
-- **Fonksiyon bileşeni kullan** (class değil). Mevcut örnekler `react.html`
-  içinde: `Avatar`, `ContactList`, `ProfilCard` (+ `ContactIcon`, `SocialIcon`
-  ok-fonksiyonları). PascalCase isimlendirme. Var olan Türkçe/İngilizce karışık
-  ada (`ProfilCard` — "e"siz) sadık kal; yeni bir isimlendirme deseni uydurma.
-- **Tek dosya kuralı**: her bileşen kendi tek dosyasında yaşar; JSX ve mantık
-  (state, effect, yardımcılar) aynı yerdedir. Ayrı stil dosyası açma — stiller
-  ortak `style.css` içindeki BEM sınıflarını kullanır.
-- **Demo veri `src/data/card.js`'de**: bileşenler veriyi **prop olarak alır**,
-  içine gömmez. `card.js` tek düzenlenebilir kaynaktır ve mevcut `profile`
-  şeklini korur:
-  ```js
-  // src/data/card.js
-  export const card = {
+- **Fonksiyon bileşeni kullan** (class değil). Mevcut örnekler `components/`
+  altında: `ProfilCard`, `Avatar`, `ContactList`, `SocialNav`, `LeadForm`
+  (+ `ContactIcon`, `SocialIcon`). PascalCase isimlendirme. Var olan
+  Türkçe/İngilizce karışık ada (`ProfilCard` — "e"siz) sadık kal; yeni bir
+  isimlendirme deseni uydurma.
+- **Tek dosya kuralı**: her bileşen kendi tek dosyasında yaşar (`components/X.tsx`);
+  JSX ve mantık (state, effect, yardımcılar) aynı yerdedir. Ayrı stil dosyası
+  açma — stiller ortak `app/globals.css` içindeki BEM sınıflarını kullanır.
+- **İçerik `lib/card-data.ts`'de**: bileşenler veriyi **prop olarak alır**,
+  içine gömmez. `card-data.ts` tek düzenlenebilir kaynaktır:
+  ```ts
+  // lib/card-data.ts
+  export const profile: Profile = {
     initials: "ME",
     name: "Mehmet Ergün",
     title: "Müzik Telif Uzmanı · MSG",
@@ -40,92 +40,57 @@ webhook çağrısı sabit bir zarf (`type`, `cardId`, `timestamp`) taşır.
     social:   [ { name: "LinkedIn", href: "https://..." }, /* ... */ ],
   };
   ```
-- **Bugünkü karşılık**: `src/` yapısı henüz yok. `src/data/card.js` gelene kadar
-  tek düzenlenebilir yer `react.html` içindeki inline `profile` nesnesidir
-  (≈ satır 30–45). Aynı içerik `index.html`'de elle senkron tutulur — birini
-  değiştirince diğerini de güncelle.
-- **Proje kısıtları**: build adımı yok; React sürümü CDN + **Babel 7** (Babel 8
-  boş sayfaya yol açar). UI metinleri ve yorumlar Türkçe; tema `data-theme`
-  attribute'u + `localStorage("bizcard-theme")` ile yönetilir.
+- **Server / Client ayrımı**: varsayılan Server Component. Yalnızca tarayıcı
+  API'si veya state gerekiyorsa `"use client"` ekle (`ThemeToggle`,
+  `ThemeApplier`, `QrCode`, `SaveContactButton`, `LeadForm`).
+- **Proje kısıtları**: `npm run build` (Next.js) çalışır durumda kalmalı. UI
+  metinleri ve yorumlar Türkçe; tema `data-theme` attribute'u +
+  `localStorage("bizcard-theme")` ile yönetilir (`lib/theme.ts`).
 
-## Webhook Veri Sözleşmesi
+## Form Veri Sözleşmesi (lead)
 
-İki kullanıcı aksiyonu dış bir webhook'a **`POST`** ile
-`Content-Type: application/json` gönderir. Endpoint URL'i yer tutucudur; proje
-sahibi doldurur. Her payload ortak zarfı taşır:
+Kart formundaki iki aksiyon aynı alanları paylaşır ve tek bir kayıt şekli üretir:
 
 | Alan | Tip | Zorunlu | Açıklama |
 |------|-----|---------|----------|
-| `type` | string | evet | Aksiyon türü (`card_saved` / `meeting_request`) |
-| `cardId` | string | evet | Kart kimliği, ör. `"mehmet-ergun"` |
-| `timestamp` | string | evet | ISO 8601, ör. `"2026-07-25T10:00:00Z"` |
+| `type` | `"card_saved"` \| `"meeting_request"` | evet | Aksiyon türü |
+| `name` | string | evet | Ad Soyad |
+| `email` | string | evet | Geri dönüş e-postası |
+| `preferredDate` | string (`YYYY-MM-DD`) | yalnızca `meeting_request` | Tercih edilen toplantı tarihi |
 
 ### 1. Kartı Kaydet — `type: "card_saved"`
-Kartı gören kişi ad + e-postasını bırakıp "Kartı Kaydet"e bastığında gönderilir.
-
-```json
-{
-  "type": "card_saved",
-  "cardId": "mehmet-ergun",
-  "timestamp": "2026-07-25T10:00:00Z",
-  "name": "Ayşe Kaya",
-  "email": "ayse@ornek.com",
-  "source": "link"
-}
-```
-
-| Alan | Tip | Zorunlu | Açıklama |
-|------|-----|---------|----------|
-| `name` | string | evet | Kaydeden kişinin adı soyadı |
-| `email` | string | evet | Geri dönüş e-postası |
-| `source` | string | hayır | Nereden geldi: `"qr"` veya `"link"` |
+Ad + e-posta zorunlu; tarih boş bırakılabilir.
 
 ### 2. Toplantı Talep Et — `type: "meeting_request"`
-Kartı gören kişi toplantı formu gönderdiğinde tetiklenir.
+Ad + e-posta + tarih zorunlu; **geçmiş tarih reddedilir** (`min` klavyeyle
+aşılabildiği için gönderimde de kontrol edilir).
 
-```json
-{
-  "type": "meeting_request",
-  "cardId": "mehmet-ergun",
-  "timestamp": "2026-07-25T10:00:00Z",
-  "name": "Ayşe Kaya",
-  "email": "ayse@ornek.com",
-  "phone": "",
-  "preferredDate": "",
-  "message": ""
-}
-```
-
-| Alan | Tip | Zorunlu | Açıklama |
-|------|-----|---------|----------|
-| `name` | string | evet | Talep edenin adı soyadı |
-| `email` | string | evet | Geri dönüş e-postası |
-| `phone` | string | hayır | Telefon (boş string olabilir) |
-| `preferredDate` | string | hayır | Tercih edilen tarih (ISO 8601 veya boş) |
-| `message` | string | hayır | Serbest not |
-
-**Yanıt beklentisi**: `2xx` = başarılı; `2xx` dışı = kullanıcıya hata göster,
-form verisini kaybetme. Ağ hatasında sessizce yut, kullanıcıya tekrar dene imkânı bırak.
+### Kalıcı depolama: henüz yok
+Kayıtlar şu an hiçbir yere yazılmıyor. `components/LeadForm.tsx` içindeki
+`BACKEND_READY = false` bayrağı, doğrulama geçtikten sonra kullanıcıya
+"veritabanı bağlanınca aktif olur" mesajını gösterir. Backend eklenirken
+(plan: Neon Postgres + Server Action, `docs/superpowers/plans/`) bu bayrak
+kalkar ve gönderim `app/actions/leads.ts` içindeki Server Action'a bağlanır.
+Eski n8n webhook entegrasyonu **kaldırıldı**; geri getirme.
 
 ## Quick Reference
 
 | Konu | Kural |
 |------|-------|
-| Bileşen tipi | Fonksiyon bileşeni, tek dosya |
-| Veri kaynağı | `src/data/card.js` (bugün: `react.html` inline `profile`) |
+| Bileşen tipi | Fonksiyon bileşeni, tek dosya (`components/X.tsx`) |
+| Veri kaynağı | `lib/card-data.ts` (`profile`) |
 | Veri geçişi | Prop ile; bileşen içine hardcode yok |
-| Stil | Ortak `style.css`, BEM sınıfları |
-| Webhook zarfı | `type`, `cardId`, `timestamp` (ISO 8601) |
-| Kartı Kaydet | `type: "card_saved"` (+ opsiyonel `source`) |
-| Toplantı Talep | `type: "meeting_request"` (+ `name`, `email`, ...) |
+| Stil | Ortak `app/globals.css`, BEM sınıfları |
+| Client bileşen | Yalnızca gerektiğinde `"use client"` |
+| Kartı Kaydet | `type: "card_saved"` (tarih opsiyonel) |
+| Toplantı Talep | `type: "meeting_request"` (tarih zorunlu, geçmiş reddedilir) |
 
 ## Common Mistakes
 
-- **Veriyi bileşen içine gömmek** → veri `src/data/card.js`'den (bugün
-  `profile` nesnesinden) prop olarak gelmeli.
+- **Veriyi bileşen içine gömmek** → veri `lib/card-data.ts`'den prop olarak
+  gelmeli.
 - **Class bileşeni veya yeni klasör deseni uydurmak** → mevcut fonksiyon
   bileşeni + tek dosya kalıbına sadık kal.
-- **`react.html` ↔ `index.html` senkronunu unutmak** → içerik değişince ikisini
-  de güncelle.
-- **Webhook zarf alanlarını atlamak** → `type`, `cardId`, `timestamp` her zaman
-  bulunmalı.
+- **Her bileşene `"use client"` koymak** → varsayılan Server Component; sadece
+  tarayıcı API'si/state gerektiğinde ekle.
+- **Tarih doğrulamasını yalnızca `min` ile bırakmak** → gönderimde de kontrol et.
