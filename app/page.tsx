@@ -1,3 +1,6 @@
+import { ProfilCard } from "@/components/ProfilCard";
+import { profile } from "@/lib/card-data";
+
 export default function Home() {
-  return <main className="card">BizCard</main>;
+  return <ProfilCard profile={profile} />;
 }
