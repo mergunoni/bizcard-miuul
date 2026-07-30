@@ -9,7 +9,7 @@ güncellenebilir ve paylaşımı kolay bir dijital profil sunmaktır.
 > (veritabanı) henüz bağlanmadı; form doğrulama yapar ama veriyi hiçbir yere
 > göndermez.
 
-🔗 Canlı: <https://bizcard-miuul-mehmet24.vercel.app/>
+🔗 Canlı: <https://bizcard-miuul-mu.vercel.app/>
 
 ## Ekran Görüntüsü
 

@@ -39,7 +39,9 @@ Next.js 16 (App Router, TypeScript) + React 19. CDN bağımlılığı yok.
   bırakılabilir. Tarihte `min` = bugün (geçmiş tarih seçilemez); klavyeyle
   aşılabildiği için gönderimde de kontrol edilir. `min` yalnızca istemcide
   hesaplanır (`useEffect`) — sunucu/istemci saat dilimi farkı hydration
-  uyuşmazlığı yaratmasın diye. Backend bağlanmadığı için `BACKEND_READY = false`
+  uyuşmazlığı yaratmasın diye. Butonların üstünde **zorunlu KVKK onay
+  kutucuğu** (`.lead__consent`) vardır: işaretlenmeden hiçbir aksiyon
+  gönderilmez (açık rıza, KVKK m. 5/1). Backend bağlanmadığı için `BACKEND_READY = false`
   iken doğrulama geçse bile veri hiçbir yere gönderilmez, kullanıcıya
   "veritabanı bağlanınca aktif olur" mesajı gösterilir. n8n webhook
   entegrasyonu kaldırıldı.
@@ -53,16 +55,20 @@ Next.js 16 (App Router, TypeScript) + React 19. CDN bağımlılığı yok.
   mantığı `lib/theme.ts`'de tek yerde; kartta `ThemeToggle` (düğme), tema
   düğmesi olmayan sayfalarda (`/privacy`) `ThemeApplier` kullanılır.
 - **Deployment:** Vercel (canonical, canlı adres:
-  `https://bizcard-miuul-mehmet24.vercel.app/`). Proje `.vercel/` ile Vercel
-  hesabına bağlı (`vercel link`); yayın `vercel --prod` ile yapılır.
+  `https://bizcard-miuul-mu.vercel.app/` — QR kod bunu işaret eder). Aynı
+  deployment'a `bizcard-miuul-mehmet24.vercel.app` ve
+  `bizcard-miuul-mergunoni-mehmet24.vercel.app` alias'larından da erişilir.
+  Proje `.vercel/` ile Vercel hesabına bağlı (`vercel link`) ve GitHub
+  repo'suna bağlıdır — `main`'e push otomatik production deploy tetikler;
+  elle yayın `vercel --prod` ile yapılır.
   Deployment Protection (SSO) kapalı tutulmalı — açılırsa kart herkese açık
   erişilemez olur (`vercel project protection disable bizcard-miuul --sso`).
   GitHub Pages (`mergunoni.github.io/bizcard-miuul/`) artık desteklenmiyor —
   statik dosyalar kaldırıldı, build adımı gerekiyor.
 - **KVKK aydınlatma metni:** `app/privacy/page.tsx` (`/privacy` route'u), kartla
-  aynı `app/globals.css` token'larını kullanan tek kanonik sayfa. Kart formunun
-  altına ("Kartı Kaydet"/"Toplantı Talep Et" butonlarından önce) bu sayfaya link
-  veren bir `.lead__privacy` notu var. Veri sorumlusu: Mehmet Ergün (kartta
+  aynı `app/globals.css` token'larını kullanan tek kanonik sayfa. Kart formunda
+  ("Kartı Kaydet"/"Toplantı Talep Et" butonlarından önce) bu sayfaya link veren
+  zorunlu bir onay kutucuğu (`.lead__consent` + `.lead__privacy`) var. Veri sorumlusu: Mehmet Ergün (kartta
   görünen iletişim bilgileriyle). Bu genel bir taslaktır, hukuki danışmanlık
   yerine geçmez; gerçek kullanım öncesi hukukçu kontrolü önerilir.
 

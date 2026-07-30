@@ -276,10 +276,27 @@ body {
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
+/* KVKK onayı: kutucuk + metin yan yana, metin kutucuğun hizasında sarar */
+.lead__consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.lead__checkbox {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 0.1rem;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
 .lead__privacy {
   font-size: 0.78rem;
+  line-height: 1.4;
   color: var(--text-muted);
-  text-align: center;
 }
 
 .lead__privacy a {

@@ -58,8 +58,10 @@ export default function PrivacyPage() {
 
         <h2>4. Toplama Yöntemi ve Hukuki Sebebi</h2>
         <p>
-          Verileriniz, bu sayfadaki form aracılığıyla elektronik ortamda, tarafınızca formu
-          göndermeniz suretiyle verdiğiniz açık rızaya dayanılarak (KVKK m. 5/1) toplanmaktadır.
+          Verileriniz, kartvizit sayfasındaki form aracılığıyla elektronik ortamda, form
+          üzerindeki onay kutucuğunu işaretleyip formu göndermeniz suretiyle verdiğiniz açık
+          rızaya dayanılarak (KVKK m. 5/1) toplanmaktadır. Onay kutucuğu işaretlenmeden form
+          gönderilemez.
         </p>
 
         <h2>5. Aktarılma</h2>

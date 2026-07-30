@@ -65,6 +65,11 @@ Ad + e-posta zorunlu; tarih boş bırakılabilir.
 Ad + e-posta + tarih zorunlu; **geçmiş tarih reddedilir** (`min` klavyeyle
 aşılabildiği için gönderimde de kontrol edilir).
 
+### KVKK onayı — her iki aksiyon için zorunlu
+Formdaki onay kutucuğu (`.lead__consent`) işaretlenmeden hiçbir aksiyon
+gönderilmez (açık rıza, KVKK m. 5/1). Backend eklendiğinde bu kontrol sunucu
+tarafında da tekrarlanmalı.
+
 ### Kalıcı depolama: henüz yok
 Kayıtlar şu an hiçbir yere yazılmıyor. `components/LeadForm.tsx` içindeki
 `BACKEND_READY = false` bayrağı, doğrulama geçtikten sonra kullanıcıya

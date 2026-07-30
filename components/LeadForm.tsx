@@ -18,6 +18,7 @@ export function LeadForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [preferredDate, setPreferredDate] = useState("");
+  const [consent, setConsent] = useState(false);
   // Sunucu ile istemcinin saat dilimi farklı olabileceğinden (hydration
   // uyuşmazlığı) bugünün tarihi yalnızca istemcide hesaplanır.
   const [minDate, setMinDate] = useState("");
@@ -43,6 +44,15 @@ export function LeadForm() {
         setStatus({ message: "Geçmiş bir tarih seçilemez.", kind: "err" });
         return;
       }
+    }
+
+    // KVKK açık rızası olmadan hiçbir aksiyon gönderilmez.
+    if (!consent) {
+      setStatus({
+        message: "Devam etmek için KVKK Aydınlatma Metni'ni onaylaman gerekiyor.",
+        kind: "err",
+      });
+      return;
     }
 
     if (!BACKEND_READY) {
@@ -106,13 +116,22 @@ export function LeadForm() {
           onChange={(e) => setPreferredDate(e.target.value)}
         />
       </label>
-      <p className="lead__privacy">
-        Formu göndererek{" "}
-        <a href="/privacy" target="_blank" rel="noopener">
-          KVKK Aydınlatma Metni
-        </a>
-        &apos;ni kabul etmiş olursunuz.
-      </p>
+      <label className="lead__consent">
+        <input
+          className="lead__checkbox"
+          type="checkbox"
+          name="consent"
+          required
+          checked={consent}
+          onChange={(e) => setConsent(e.target.checked)}
+        />
+        <span className="lead__privacy">
+          <a href="/privacy" target="_blank" rel="noopener">
+            KVKK Aydınlatma Metni
+          </a>
+          &apos;ni okudum, kişisel verilerimin işlenmesini kabul ediyorum.
+        </span>
+      </label>
       <div className="lead__actions">
         <button className="lead__submit" type="submit">
           Kartı Kaydet
