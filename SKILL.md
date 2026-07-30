@@ -47,16 +47,20 @@ kayıt sabit bir şekle (`type`, `name`, `email`, `preferredDate`) sahiptir.
   metinleri ve yorumlar Türkçe; tema `data-theme` attribute'u +
   `localStorage("bizcard-theme")` ile yönetilir (`lib/theme.ts`).
 
-## Form Veri Sözleşmesi (lead)
+## Veri Sözleşmesi: `leads` Tablosu
 
-Kart formundaki iki aksiyon aynı alanları paylaşır ve tek bir kayıt şekli üretir:
+Kart formundaki iki aksiyon aynı alanları paylaşır ve `app/actions/leads.ts`
+içindeki `submitLead` Server Action'ı aracılığıyla Neon Postgres'teki `leads`
+tablosuna yazılır (şema: `lib/db/schema.ts`). Dış bir webhook **kullanılmaz**.
 
-| Alan | Tip | Zorunlu | Açıklama |
-|------|-----|---------|----------|
-| `type` | `"card_saved"` \| `"meeting_request"` | evet | Aksiyon türü |
-| `name` | string | evet | Ad Soyad |
-| `email` | string | evet | Geri dönüş e-postası |
-| `preferredDate` | string (`YYYY-MM-DD`) | yalnızca `meeting_request` | Tercih edilen toplantı tarihi |
+| Kolon | Tip | Açıklama |
+|-------|-----|----------|
+| `type` | `"card_saved"` \| `"meeting_request"` | Aksiyon türü |
+| `name` | text | Ad Soyad (zorunlu) |
+| `email` | text | Geri dönüş e-postası (zorunlu, regex ile doğrulanır) |
+| `preferred_date` | date, null olabilir | Yalnızca `meeting_request` için dolu |
+| `consent` | boolean, not null | KVKK açık rıza kaydı (her zaman `true`) |
+| `created_at` | timestamptz | Sunucu tarafında otomatik (`defaultNow()`) |
 
 ### 1. Kartı Kaydet — `type: "card_saved"`
 Ad + e-posta zorunlu; tarih boş bırakılabilir.
@@ -67,15 +71,17 @@ aşılabildiği için gönderimde de kontrol edilir).
 
 ### KVKK onayı — her iki aksiyon için zorunlu
 Formdaki onay kutucuğu (`.lead__consent`) işaretlenmeden hiçbir aksiyon
-gönderilmez (açık rıza, KVKK m. 5/1). Backend eklendiğinde bu kontrol sunucu
-tarafında da tekrarlanmalı.
+gönderilmez (açık rıza, KVKK m. 5/1). Kontrol **sunucu tarafında** yapılır;
+istemcideki kutucuk atlatılsa da Server Action reddeder.
 
-### Kalıcı depolama: henüz yok
-Kayıtlar şu an hiçbir yere yazılmıyor. `components/LeadForm.tsx` içindeki
-`BACKEND_READY = false` bayrağı, doğrulama geçtikten sonra kullanıcıya
-"veritabanı bağlanınca aktif olur" mesajını gösterir. Backend eklenirken
-(plan: Neon Postgres + Server Action, `docs/superpowers/plans/`) bu bayrak
-kalkar ve gönderim `app/actions/leads.ts` içindeki Server Action'a bağlanır.
+### Doğrulama sunucuda, istemcide değil
+`LeadForm` yalnızca alanları toplayıp `FormData` olarak Server Action'a
+gönderir; tüm kurallar (ad/e-posta, tarih zorunluluğu, geçmiş tarih, KVKK
+onayı) `submitLead` içindedir. Yeni bir kural eklerken **oraya** ekle.
+
+**Yinelenen kayıt koruması**: aynı e-posta + `type` için son 5 saniye içinde
+kayıt varsa yeni satır eklenmez (art arda hızlı gönderimde çift kayıt olmaz).
+
 Eski n8n webhook entegrasyonu **kaldırıldı**; geri getirme.
 
 ## Quick Reference

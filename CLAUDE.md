@@ -6,10 +6,8 @@ kendi dijital kartvizitlerini oluşturur, düzenler ve bir link ya da QR kod
 aracılığıyla başkalarıyla paylaşabilir. Amaç, klasik basılı kartvizitin yerini
 alan, güncellenebilir ve paylaşımı kolay bir dijital profil sunmaktır.
 
-> Not: Uygulama Next.js App Router'a taşındı. Kart formunun kayıtlarını
-> saklayacak backend (Neon Postgres + Server Action) **henüz bağlanmadı**;
-> form istemci tarafında doğrulama yapar ama veriyi hiçbir yere göndermez
-> (`components/LeadForm.tsx` içindeki `BACKEND_READY` bayrağı).
+> Not: Uygulama Next.js App Router'da çalışıyor ve kart formu Neon Postgres'e
+> (Server Action ile) kayıt yapıyor. n8n webhook entegrasyonu kaldırıldı.
 
 ## Hedefler / Kapsam (MVP)
 İlk sürümde hedeflenen özellikler:
@@ -20,15 +18,20 @@ alan, güncellenebilir ve paylaşımı kolay bir dijital profil sunmaktır.
 - [x] Kartvizit görüntüleme (paylaşılan kişinin göreceği herkese açık sayfa)
 - [x] Tema seçeneği (açık / koyu)
 - [x] (Opsiyonel) Rehbere kaydet (vCard / .vcf indirme)
-- [ ] Form kayıtlarının veritabanına yazılması (Neon Postgres + Server Action)
+- [x] Form kayıtlarının veritabanına yazılması (Neon Postgres + Server Action)
+- [ ] Kayıtları görüntüleyecek admin/panel sayfası (şimdilik Neon konsolundan
+      bakılıyor)
 
 ## Teknoloji Yığını
 Next.js 16 (App Router, TypeScript) + React 19. CDN bağımlılığı yok.
 
 - **Dil / Framework:** Next.js (App Router) + TypeScript + React 19
 - **Veri saklama:** Tema tercihi için tarayıcı `localStorage`. Form kayıtları
-  için kalıcı depolama **henüz yok** (planlanan: Neon Postgres + Drizzle,
-  `docs/superpowers/plans/2026-07-29-nextjs-backend-gecisi.md` Task 6–7).
+  için **Neon Postgres** (Vercel Marketplace, `free_v3` plan, `fra1` bölgesi) +
+  `drizzle-orm` / `@neondatabase/serverless`. Bağlantı `DATABASE_URL`
+  (havuzlanmış) ile; şema değişiklikleri `DATABASE_URL_UNPOOLED` üzerinden
+  `drizzle-kit push` ile uygulanır. `getDb()` lazy init'tir — `next build`
+  sırasında `DATABASE_URL` yoksa build kırılmaz.
 - **QR kod:** Kartın en altındaki QR, canlı deploy URL'ini işaret eder
   (`qrcode.react` → `QRCodeSVG`, npm bağımlılığı). Deploy adresi tek yerden
   değiştirilir: `lib/config.ts` içindeki `DEPLOY_URL` sabiti.
@@ -41,10 +44,16 @@ Next.js 16 (App Router, TypeScript) + React 19. CDN bağımlılığı yok.
   hesaplanır (`useEffect`) — sunucu/istemci saat dilimi farkı hydration
   uyuşmazlığı yaratmasın diye. Butonların üstünde **zorunlu KVKK onay
   kutucuğu** (`.lead__consent`) vardır: işaretlenmeden hiçbir aksiyon
-  gönderilmez (açık rıza, KVKK m. 5/1). Backend bağlanmadığı için `BACKEND_READY = false`
-  iken doğrulama geçse bile veri hiçbir yere gönderilmez, kullanıcıya
-  "veritabanı bağlanınca aktif olur" mesajı gösterilir. n8n webhook
-  entegrasyonu kaldırıldı.
+  gönderilmez (açık rıza, KVKK m. 5/1).
+  **Doğrulamanın tamamı Server Action'dadır** (`app/actions/leads.ts`) — istemci
+  yalnızca alanları paketler, böylece istemci kontrolü atlatılsa da sunucu
+  reddeder. Alanlar kontrollü (`useState`) tutulur ve dispatch `action` prop'u
+  yerine `startTransition` içinde elle çağrılır; sebebi: React `action`
+  prop'uyla gönderilen formu aksiyon bitince sıfırlıyor, bu da doğrulama
+  hatasında kullanıcının girdiği bilgileri kaybetmesine yol açıyordu. Form
+  yalnızca başarılı kayıttan sonra temizlenir. `pending` iken iki buton da
+  devre dışıdır; ayrıca Server Action içinde 5 saniyelik yinelenen-kayıt
+  kontrolü vardır (aynı e-posta + tür).
 - **Rehbere kaydet (vCard):** Kart formunun altında, QR kodun hemen üstündeki
   "📇 Rehbere Kaydet" butonu (`components/SaveContactButton.tsx`),
   `lib/vcard.ts`'deki `buildVCard`/`vCardFilename` ile `profile` verisinden
@@ -76,6 +85,8 @@ Next.js 16 (App Router, TypeScript) + React 19. CDN bağımlılığı yok.
 - `app/layout.tsx` — kök layout (`lang="tr"`, metadata, global CSS).
 - `app/page.tsx` — ana sayfa; `ProfilCard` bileşenini render eder.
 - `app/privacy/page.tsx` — KVKK aydınlatma metni (`/privacy`).
+- `app/actions/leads.ts` — kart formu Server Action'ı (`submitLead`):
+  doğrulama + `leads` tablosuna insert.
 - `app/globals.css` — tüm stiller (tema token'ları, `.card`, `.contact`,
   `.social`, `.qr*`, `.lead*`, `.save-contact`, `.policy*`, responsive).
 - `components/` — `ProfilCard` (kartı kuran kapsayıcı), `Avatar`, `ContactList`,
@@ -87,14 +98,23 @@ Next.js 16 (App Router, TypeScript) + React 19. CDN bağımlılığı yok.
 - `lib/vcard.ts` — vCard üretimi (`buildVCard`, `vCardFilename`).
 - `lib/theme.ts` — tema okuma (`readStoredTheme`, `THEME_STORAGE_KEY`).
 - `lib/date.ts` — yerel gün (`todayLocalISODate`).
+- `lib/db/schema.ts`, `lib/db/index.ts` — Drizzle `leads` şeması ve `getDb()`.
+- `drizzle.config.ts` — drizzle-kit yapılandırması (`out: ./drizzle`).
+- `.agents/skills/`, `skills-lock.json` — Neon entegrasyonunun kurduğu referans
+  skill'ler (Neon dokümantasyonu).
 - `docs/superpowers/specs/`, `docs/superpowers/plans/` — tasarım ve uygulama
   planı dokümanları.
 - `SKILL.md` — bileşen kuralları ve form veri sözleşmesi için referans skill.
 
 ## Geliştirme Komutları
 - **Kurulum:** `npm install`
+- **Ortam değişkenleri:** `vercel env pull .env.local --yes` (Neon'un
+  `DATABASE_URL`'i buradan gelir; `.env*` gitignore'da)
 - **Geliştirme sunucusu:** `npm run dev` (http://localhost:3000)
 - **Build:** `npm run build`
+- **Şema uygula:** `npx dotenv -e .env.local -- npx drizzle-kit push`
+  (drizzle-kit `.env.local`'i kendiliğinden yüklemez, `dotenv-cli` şart)
+- **Kayıtlara bak:** `npx dotenv -e .env.local -- npx drizzle-kit studio`
 - **Test:** _manuel (tarayıcıda görsel doğrulama)_
 
 ## Kod Konvansiyonları / Çalışma Kuralları

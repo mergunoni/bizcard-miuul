@@ -1,20 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { startTransition, useActionState, useEffect, useState } from "react";
+import { submitLead, type LeadActionState } from "@/app/actions/leads";
 import { todayLocalISODate } from "@/lib/date";
 
-// Kayıtları saklayacak backend (Neon Postgres + Server Action) henüz bağlanmadı.
-// Bağlandığında: bu bayrak kalkar, `submit` içindeki yer tutucu dal yerine
-// `app/actions/leads.ts` içindeki Server Action `useActionState` ile çağrılır.
-const BACKEND_READY = false;
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const initialState: LeadActionState = { status: "idle", message: "" };
 
 type ActionType = "card_saved" | "meeting_request";
-type Status = { message: string; kind: "" | "ok" | "err" };
 
 export function LeadForm() {
-  const [status, setStatus] = useState<Status>({ message: "", kind: "" });
+  const [state, formAction, pending] = useActionState(submitLead, initialState);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [preferredDate, setPreferredDate] = useState("");
@@ -27,47 +22,40 @@ export function LeadForm() {
     setMinDate(todayLocalISODate());
   }, []);
 
+  // Yalnızca başarılı kayıttan sonra form temizlenir; hata durumunda kullanıcı
+  // girdiği bilgileri kaybetmez. (Alanlar kontrollü tutulur; `action` prop'u
+  // yerine dispatch elle çağrıldığı için React formu kendiliğinden sıfırlamaz.)
+  useEffect(() => {
+    if (state.status === "success") {
+      setName("");
+      setEmail("");
+      setPreferredDate("");
+      setConsent(false);
+    }
+  }, [state]);
+
+  // Doğrulamanın tamamı Server Action'da; burada yalnızca alanlar paketlenir.
   function submit(type: ActionType) {
-    if (!name.trim() || !EMAIL_RE.test(email.trim())) {
-      setStatus({ message: "Lütfen ad ve geçerli bir e-posta gir.", kind: "err" });
-      return;
-    }
+    if (pending) return;
 
-    // Tarih yalnızca toplantı talebinde zorunlu; kart kaydında serbest.
-    if (type === "meeting_request") {
-      if (!preferredDate) {
-        setStatus({ message: "Toplantı için tercih ettiğin tarihi seç.", kind: "err" });
-        return;
-      }
-      // "min" klavyeyle aşılabildiği için gönderimde de kontrol edilir
-      if (preferredDate < todayLocalISODate()) {
-        setStatus({ message: "Geçmiş bir tarih seçilemez.", kind: "err" });
-        return;
-      }
-    }
+    const formData = new FormData();
+    formData.set("actionType", type);
+    formData.set("name", name);
+    formData.set("email", email);
+    formData.set("preferredDate", preferredDate);
+    if (consent) formData.set("consent", "on");
 
-    // KVKK açık rızası olmadan hiçbir aksiyon gönderilmez.
-    if (!consent) {
-      setStatus({
-        message: "Devam etmek için KVKK Aydınlatma Metni'ni onaylaman gerekiyor.",
-        kind: "err",
-      });
-      return;
-    }
-
-    if (!BACKEND_READY) {
-      setStatus({
-        message: "Form hazır; veritabanı bağlanınca kayıt aktif olur.",
-        kind: "err",
-      });
-      return;
-    }
+    // Dispatch `action` prop'u yerine elle çağrıldığı için transition şart:
+    // aksi hâlde `pending` güncellenmez ve butonlar devre dışı kalmaz.
+    startTransition(() => {
+      formAction(formData);
+    });
   }
 
   const statusClass =
     "lead__status" +
-    (status.kind === "ok" ? " lead__status--ok" : "") +
-    (status.kind === "err" ? " lead__status--err" : "");
+    (state.status === "success" ? " lead__status--ok" : "") +
+    (state.status === "error" ? " lead__status--err" : "");
 
   return (
     <form
@@ -133,19 +121,20 @@ export function LeadForm() {
         </span>
       </label>
       <div className="lead__actions">
-        <button className="lead__submit" type="submit">
+        <button className="lead__submit" type="submit" disabled={pending}>
           Kartı Kaydet
         </button>
         <button
           className="lead__submit lead__submit--alt"
           type="button"
           onClick={() => submit("meeting_request")}
+          disabled={pending}
         >
           Toplantı Talep Et
         </button>
       </div>
       <p className={statusClass} role="status" aria-live="polite">
-        {status.message}
+        {pending ? "Gönderiliyor…" : state.message}
       </p>
     </form>
   );

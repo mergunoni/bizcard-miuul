@@ -64,15 +64,13 @@ export default function PrivacyPage() {
           gönderilemez.
         </p>
 
-        <h2>5. Aktarılma</h2>
+        <h2>5. Aktarılma ve Saklandığı Yer</h2>
         <p>
-          Form gönderimi şu anda herhangi bir üçüncü taraf otomasyon hizmetine iletilmemektedir;
-          kayıt altyapısı devreye alınana kadar girdiğiniz bilgiler yalnızca tarayıcınızda kalır ve
-          hiçbir yere gönderilmez. Kayıt altyapısı devreye alındığında verileriniz yalnızca bu
-          sayfada açıklanan amaçlarla, gerekli teknik ve idari tedbirler alınarak barındırma/veri
-          tabanı hizmet sağlayıcısında saklanacaktır. Verileriniz hiçbir durumda burada belirtilen
-          amaçlar dışında üçüncü kişilerle paylaşılmaz, satılmaz veya pazarlama amacıyla
-          kullanılmaz.
+          Verileriniz, bu sitenin barındırıldığı altyapı sağlayıcısı (Vercel) ve veritabanı hizmet
+          sağlayıcısı (Neon Postgres) üzerinde, Avrupa Birliği içindeki sunucularda (Frankfurt,
+          Almanya) saklanır. Bu sağlayıcılar yalnızca hizmeti sunmak amacıyla veri işleyen
+          konumundadır. Verileriniz, burada belirtilen amaçlar dışında üçüncü kişilerle
+          paylaşılmaz, satılmaz veya pazarlama amacıyla kullanılmaz.
         </p>
 
         <h2>6. Saklama Süresi</h2>
